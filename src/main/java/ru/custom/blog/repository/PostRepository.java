@@ -9,6 +9,7 @@ public interface PostRepository {
     PostModel findPostById(Long id);
     Long save(PostModel post);
     void update(PostModel post);
+    void deleteById(Long id);
     Long getTotalCount();
     String findImageById(Long l);
     void incrementLikesCount(Long id);

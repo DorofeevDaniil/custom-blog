@@ -44,6 +44,7 @@ public class JdbcNativePostRepository implements PostRepository{
                                     ,tags = ?
                                 WHERE id = ?
                             """;
+    private static final String DELETE_POST = "delete from posts where id = ?";
 
     public JdbcNativePostRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -122,6 +123,11 @@ public class JdbcNativePostRepository implements PostRepository{
     public void decrementLikesCount(Long id) {
         String query = UPDATE_LIKES + " - 1 " + "where id = ?";
         jdbcTemplate.update(query, id);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        jdbcTemplate.update(DELETE_POST, id);
     }
 
     @Override

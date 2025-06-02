@@ -87,6 +87,10 @@ public class PostService {
         return filePath;
     }
 
+    public void deletePost(Long id) {
+        postRepository.deleteById(id);
+    }
+
     private PostModel getPostComments(PostModel post) {
         List<CommentModel> comments = commentsService.getByPostId(post.getId());
         post.setComments(comments);

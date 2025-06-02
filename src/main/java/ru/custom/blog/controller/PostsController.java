@@ -21,7 +21,7 @@ public class PostsController {
 
     private final PostService postService;
 
-    private static final String REDIRECT_POSTS = "redirect:/posts/";
+    private static final String REDIRECT_POSTS = "redirect:/posts";
 
     @Autowired
     public PostsController(PostService postService) {
@@ -61,7 +61,7 @@ public class PostsController {
         PostModel post = new PostModel(title, 0, Arrays.stream(tags.split(" ")).toList(), text);
         Long postId = postService.savePost(post, image, request.getServletContext().getRealPath(""));
 
-        return REDIRECT_POSTS + postId;
+        return REDIRECT_POSTS + "/" + postId;
     }
 
     @PostMapping("/posts/{id}")
@@ -76,7 +76,7 @@ public class PostsController {
         PostModel post = new PostModel(id, title, Arrays.stream(tags.split(" ")).toList(), text);
         postService.editPost(post, image, request.getServletContext().getRealPath(""));
 
-        return REDIRECT_POSTS + id;
+        return REDIRECT_POSTS + "/" + id;
     }
 
     @GetMapping("/posts/{id}")
@@ -96,6 +96,17 @@ public class PostsController {
 
         postService.updateLikesCount(id, like);
 
-        return REDIRECT_POSTS + id;
+        return REDIRECT_POSTS + "/" + id;
+    }
+
+
+
+    @PostMapping("/posts/{id}/delete")
+    public String handleDeletePost(
+        @PathVariable("id") Long id) {
+
+        postService.deletePost(id);
+
+        return REDIRECT_POSTS;
     }
 }
