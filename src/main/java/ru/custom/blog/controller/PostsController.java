@@ -126,4 +126,14 @@ public class PostsController {
 
         return REDIRECT_POSTS + "/" + postId;
     }
+
+    @PostMapping("/posts/{id}/comments/{commentId}/delete")
+    public String handlAddComment(
+        @PathVariable("id") Long postId,
+        @PathVariable("commentId") Long commentId) {
+
+        commentsService.removeComment(commentId);
+
+        return REDIRECT_POSTS + "/" + postId;
+    }
 }

@@ -11,6 +11,8 @@ public class JdbcNativeCommentRepository implements CommentRepository {
     private static final String SELECT_ALL = "select id, post_id, text from comments where post_id = ?";
     private static final  String INSERT_COMMENT = "insert into comments(post_id, text) values (?, ?)";
 
+    private static final String DELETE_COMMENT = "delete from comments where id = ?";
+
     private final JdbcTemplate jdbcTemplate;
 
     public JdbcNativeCommentRepository(JdbcTemplate jdbcTemplate) {
@@ -39,7 +41,7 @@ public class JdbcNativeCommentRepository implements CommentRepository {
 
     @Override
     public void deleteById(Long id) {
-        //для дальнейшей реализации
+        jdbcTemplate.update(DELETE_COMMENT, id);
     }
 
     @Override
