@@ -10,6 +10,8 @@ import ru.custom.blog.repository.PostRepository;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 @Service
@@ -45,6 +47,8 @@ public class PostService {
         String filePath = saveImage(imageFile, basePath);
         post.setImagePath(filePath);
         postRepository.update(post);
+
+        removeImage(previousImagePath);
     }
 
     public List<PostModel> getPage(Integer pageNumber, Integer pageSize) {
@@ -85,6 +89,14 @@ public class PostService {
         }
 
         return filePath;
+    }
+
+    private void removeImage(String imagePath) {
+        try {
+            Files.delete(Path.of(imagePath));
+        } catch(IOException e) {
+            logger.error("Файл не может быть удален");
+        }
     }
 
     public void deletePost(Long id) {
