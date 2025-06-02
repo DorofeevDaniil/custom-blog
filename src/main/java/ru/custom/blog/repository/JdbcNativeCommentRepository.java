@@ -19,6 +19,7 @@ public class JdbcNativeCommentRepository implements CommentRepository {
                             """;
 
     private static final String DELETE_COMMENT = "delete from comments where id = ?";
+    private static final String DELETE_POST_COMMENTS = "delete from comments where post_id = ?";
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -47,16 +48,21 @@ public class JdbcNativeCommentRepository implements CommentRepository {
     }
 
     @Override
-    public void deleteById(Long id) {
-        jdbcTemplate.update(DELETE_COMMENT, id);
-    }
-
-    @Override
     public void update(CommentModel comment) {
         jdbcTemplate.update(UPDATE_COMMENT,
             comment.getPostId(),
             comment.getText(),
             comment.getId()
         );
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        jdbcTemplate.update(DELETE_COMMENT, id);
+    }
+
+    @Override
+    public void deleteByPostId(Long postId) {
+        jdbcTemplate.update(DELETE_POST_COMMENTS, postId);
     }
 }

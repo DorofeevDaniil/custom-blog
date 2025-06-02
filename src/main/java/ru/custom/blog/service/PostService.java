@@ -43,7 +43,6 @@ public class PostService {
     public void editPost(PostModel post, MultipartFile imageFile, String basePath) {
         String previousImagePath = postRepository.findImageById(post.getId());
 
-
         String filePath = saveImage(imageFile, basePath);
         post.setImagePath(filePath);
         postRepository.update(post);
@@ -100,6 +99,7 @@ public class PostService {
     }
 
     public void deletePost(Long id) {
+        commentsService.deleteAllPostComments(id);
         postRepository.deleteById(id);
     }
 

@@ -31,4 +31,8 @@ public class CommentsService {
         commentRepository.update(comment);
     }
 
+    public void deleteAllPostComments(Long postId) {
+        commentRepository.deleteByPostId(postId);
+    }
+
 }
