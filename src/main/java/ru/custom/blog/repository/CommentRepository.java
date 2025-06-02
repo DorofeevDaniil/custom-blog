@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface CommentRepository {
     List<CommentModel> findByPostId(Long postId);
-    Long save(CommentModel comment);
+    void save(CommentModel comment);
     void deleteById(Long id);
     Long getTotalCount();
 }

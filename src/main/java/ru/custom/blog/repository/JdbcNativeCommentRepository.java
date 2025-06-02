@@ -8,7 +8,8 @@ import java.util.List;
 
 @Repository
 public class JdbcNativeCommentRepository implements CommentRepository {
-    private static final String SELECT_ALL = "select id, text from comments where post_id = ?";
+    private static final String SELECT_ALL = "select id, post_id, text from comments where post_id = ?";
+    private static final  String INSERT_COMMENT = "insert into comments(post_id, text) values (?, ?)";
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -21,14 +22,19 @@ public class JdbcNativeCommentRepository implements CommentRepository {
             SELECT_ALL,
             (rs, rowNum) -> new CommentModel(
                 rs.getLong("id"),
+                rs.getLong("post_id"),
                 rs.getString("text")
             ),
             postId);
     }
 
     @Override
-    public Long save(CommentModel user) {
-        return null;
+    public void save(CommentModel comment) {
+        jdbcTemplate.update(
+            INSERT_COMMENT,
+            comment.getPostId(),
+            comment.getText()
+        );
     }
 
     @Override

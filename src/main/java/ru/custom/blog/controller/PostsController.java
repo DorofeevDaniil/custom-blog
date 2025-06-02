@@ -9,8 +9,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import ru.custom.blog.model.CommentModel;
 import ru.custom.blog.model.PostModel;
 import ru.custom.blog.pagination.Paging;
+import ru.custom.blog.service.CommentsService;
 import ru.custom.blog.service.PostService;
 
 import java.util.Arrays;
@@ -20,12 +22,14 @@ import java.util.List;
 public class PostsController {
 
     private final PostService postService;
+    private final CommentsService commentsService;
 
     private static final String REDIRECT_POSTS = "redirect:/posts";
 
     @Autowired
-    public PostsController(PostService postService) {
+    public PostsController(PostService postService, CommentsService commentsService) {
         this.postService = postService;
+        this.commentsService = commentsService;
     }
 
     @GetMapping("/")
@@ -99,8 +103,6 @@ public class PostsController {
         return REDIRECT_POSTS + "/" + id;
     }
 
-
-
     @PostMapping("/posts/{id}/delete")
     public String handleDeletePost(
         @PathVariable("id") Long id) {
@@ -108,5 +110,20 @@ public class PostsController {
         postService.deletePost(id);
 
         return REDIRECT_POSTS;
+    }
+
+    @PostMapping("/posts/{id}/comments")
+    public String handlAddComment(
+        @PathVariable("id") Long postId,
+        @RequestParam("text") String text) {
+
+
+        CommentModel comment = new CommentModel();
+        comment.setPostId(postId);
+        comment.setText(text);
+
+        commentsService.saveComment(comment);
+
+        return REDIRECT_POSTS + "/" + postId;
     }
 }
