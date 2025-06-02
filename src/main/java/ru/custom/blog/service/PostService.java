@@ -42,15 +42,15 @@ public class PostService {
     public List<PostModel> getPage(Integer pageNumber, Integer pageSize) {
         List<PostModel> posts = postRepository.findPage(pageSize, (pageNumber - 1) * pageSize);
 
-        return posts.stream().map(post -> {
-                    List<CommentModel> comments = commentsService.getByPostId(post.getId());
-                    post.setComments(comments);
-                    return post;
-                }).toList();
+        return posts.stream().map(this::getPostComments).toList();
+    }
+
+    public PostModel getPost(Long id) {
+        PostModel post = postRepository.findPostById(id);
+        return getPostComments(post);
     }
 
     private String saveFile(MultipartFile imageFile, String basePath) {
-
         String uploadDir = basePath + "images";
 
         File uploadDirFile = new File(uploadDir);
@@ -69,6 +69,12 @@ public class PostService {
         }
 
         return filePath;
+    }
+
+    private PostModel getPostComments(PostModel post) {
+        List<CommentModel> comments = commentsService.getByPostId(post.getId());
+        post.setComments(comments);
+        return post;
     }
 
     public void savePost(PostModel post) {

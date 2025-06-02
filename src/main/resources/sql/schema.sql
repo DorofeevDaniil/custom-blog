@@ -13,10 +13,3 @@ create table if not exists comments(
     text varchar(1000000000) not null,
     foreign key (post_id) references posts(id)
 );
-
-create table if not exists tags(
-    id bigserial primary key,
-    post_id bigint not null,
-    tag varchar(20) not null,
-    foreign key (post_id) references posts(id)
-);

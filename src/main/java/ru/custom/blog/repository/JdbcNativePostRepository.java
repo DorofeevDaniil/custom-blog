@@ -1,7 +1,5 @@
 package ru.custom.blog.repository;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -12,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class JdbcNativePostRepository implements PostRepository{
@@ -21,6 +20,12 @@ public class JdbcNativePostRepository implements PostRepository{
                                             select id, title, text, image_path, likes_count, tags
                                             from posts
                                             order by id desc
+                                        """;
+
+    private static final String SELECT_POST = """
+                                            select id, title, text, image_path, likes_count, tags
+                                            from posts
+                                            where id = ?
                                         """;
     public static final String SELECT_IMAGE = "select image_path from posts where id = ?";
     public static final String INSERT_ROW = """
@@ -71,6 +76,19 @@ public class JdbcNativePostRepository implements PostRepository{
     public String findImageById(Long id) {
         return jdbcTemplate.queryForObject(
             SELECT_IMAGE, new Object[]{id}, String.class);
+    }
+
+    @Override
+    public PostModel findPostById(Long id) {
+        return jdbcTemplate.queryForObject(SELECT_POST,
+            (rs, rowNum) -> new PostModel(
+                rs.getLong("id"),
+                rs.getString("title"),
+                rs.getString("text"),
+                rs.getString("image_path"),
+                rs.getInt("likes_count"),
+                Arrays.stream(rs.getString("tags").split(" ")).toList()
+            ), id);
     }
 
     @Override

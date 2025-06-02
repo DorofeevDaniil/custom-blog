@@ -62,6 +62,15 @@ public class PostsController {
         return "redirect:/posts";
     }
 
+    @GetMapping("/posts/{id}")
+    public String showPost(
+        @PathVariable("id") Long id,
+        Model model) {
+        model.addAttribute("post", postService.getPost(id));
+
+        return "post";
+    }
+
     @PostMapping("/posts/{id}")
     public String handleUpdatePost(
         @PathVariable("id") Long id,
@@ -71,6 +80,6 @@ public class PostsController {
         @RequestParam("image") MultipartFile image,
         Model model) {
 
-        return "redirect:post";
+        return "post";
     }
 }
