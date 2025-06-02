@@ -35,6 +35,15 @@ public class JdbcNativePostRepository implements PostRepository{
     private static final String UPDATE_LIKES = "update posts set likes_count = likes_count";
 
     private static final String SELECT_COUNT = "select count(*) as cnt from posts";
+    private static final String UPDATE_POST = """
+                                UPDATE posts
+                                SET 
+                                     title = ?
+                                    ,text = ?
+                                    ,image_path = ?
+                                    ,tags = ?
+                                WHERE id = ?
+                            """;
 
     public JdbcNativePostRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -66,12 +75,22 @@ public class JdbcNativePostRepository implements PostRepository{
             statement.setString(2, post.getText());
             statement.setString(3, post.getImagePath());
             statement.setInt(4, post.getLikesCount());
-            statement.setString(5, String.join(" ", post.getTags()));
+            statement.setString(5, post.getTagsAsText());
 
             return statement;
         }, keyHolder);
 
         return keyHolder.getKey().longValue();
+    }
+
+    @Override
+    public void update(PostModel post) {
+        jdbcTemplate.update(UPDATE_POST,
+            post.getTitle(),
+            post.getText(),
+            post.getImagePath(),
+            post.getTagsAsText(),
+            post.getId());
     }
 
     @Override
@@ -103,11 +122,6 @@ public class JdbcNativePostRepository implements PostRepository{
     public void decrementLikesCount(Long id) {
         String query = UPDATE_LIKES + " - 1 " + "where id = ?";
         jdbcTemplate.update(query, id);
-    }
-
-    @Override
-    public void deleteById(Long id) {
-        //для дальнейшей реализации
     }
 
     @Override

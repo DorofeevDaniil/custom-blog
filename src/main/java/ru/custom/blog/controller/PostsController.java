@@ -57,9 +57,24 @@ public class PostsController {
         HttpServletRequest request) {
 
         PostModel post = new PostModel(title, 0, Arrays.stream(tags.split(" ")).toList(), text);
-        postService.savePost(post, image, request.getServletContext().getRealPath(""));
+        Long postId = postService.savePost(post, image, request.getServletContext().getRealPath(""));
 
-        return "redirect:/posts";
+        return "redirect:/posts/" + postId;
+    }
+
+    @PostMapping("/posts/{id}")
+    public String handleUpdatePost(
+        @PathVariable("id") Long id,
+        @RequestParam("title") String title,
+        @RequestParam("tags") String tags,
+        @RequestParam("text") String text,
+        @RequestParam("image") MultipartFile image,
+        HttpServletRequest request) {
+
+        PostModel post = new PostModel(id, title, Arrays.stream(tags.split(" ")).toList(), text);
+        postService.editPost(post, image, request.getServletContext().getRealPath(""));
+
+        return "redirect:/posts/" + id;
     }
 
     @GetMapping("/posts/{id}")
@@ -80,17 +95,5 @@ public class PostsController {
         postService.updateLikesCount(id, like);
 
         return "redirect:/posts/" + id;
-    }
-
-    @PostMapping("/posts/{id}")
-    public String handleUpdatePost(
-        @PathVariable("id") Long id,
-        @RequestParam("title") String title,
-        @RequestParam("tags") String tags,
-        @RequestParam("text") String text,
-        @RequestParam("image") MultipartFile image,
-        Model model) {
-
-        return "post";
     }
 }

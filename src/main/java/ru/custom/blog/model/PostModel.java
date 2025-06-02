@@ -39,6 +39,13 @@ public class PostModel {
         this.text = text;
     }
 
+    public PostModel(Long id, String title, List<String> tags, String text) {
+        this.id = id;
+        this.title = title;
+        this.tags = tags;
+        this.text = text;
+    }
+
     public PostModel() {
     }
 
@@ -64,6 +71,10 @@ public class PostModel {
 
     public List<String> getTags() {
         return this.tags;
+    }
+
+    public String getTagsAsText() {
+        return String.join(" ", this.tags);
     }
 
     public String getTextPreview() {

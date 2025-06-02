@@ -31,12 +31,20 @@ public class PostService {
 
     //addTags
 
-    public void savePost(PostModel post, MultipartFile imageFile, String basePath) {
-        String filePath = saveFile(imageFile, basePath);
+    public Long savePost(PostModel post, MultipartFile imageFile, String basePath) {
+        String filePath = saveImage(imageFile, basePath);
         post.setImagePath(filePath);
 
-        long postId = postRepository.save(post);
-        //set tags
+        return postRepository.save(post);
+    }
+
+    public void editPost(PostModel post, MultipartFile imageFile, String basePath) {
+        String previousImagePath = postRepository.findImageById(post.getId());
+
+
+        String filePath = saveImage(imageFile, basePath);
+        post.setImagePath(filePath);
+        postRepository.update(post);
     }
 
     public List<PostModel> getPage(Integer pageNumber, Integer pageSize) {
@@ -52,15 +60,13 @@ public class PostService {
 
     public void updateLikesCount(Long id, boolean like) {
         if (like) {
-            logger.info("LIKE TRUE");
             postRepository.incrementLikesCount(id);
         } else {
-            logger.info("LIKE FALSE");
             postRepository.decrementLikesCount(id);
         }
     }
 
-    private String saveFile(MultipartFile imageFile, String basePath) {
+    private String saveImage(MultipartFile imageFile, String basePath) {
         String uploadDir = basePath + "images";
 
         File uploadDirFile = new File(uploadDir);
@@ -88,6 +94,6 @@ public class PostService {
     }
 
     public void savePost(PostModel post) {
-        long postId = postRepository.save(post);
+        postRepository.save(post);
     }
 }
