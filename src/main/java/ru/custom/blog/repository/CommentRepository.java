@@ -8,5 +8,5 @@ public interface CommentRepository {
     List<CommentModel> findByPostId(Long postId);
     void save(CommentModel comment);
     void deleteById(Long id);
-    Long getTotalCount();
+    void update(CommentModel comment);
 }

@@ -10,6 +10,13 @@ import java.util.List;
 public class JdbcNativeCommentRepository implements CommentRepository {
     private static final String SELECT_ALL = "select id, post_id, text from comments where post_id = ?";
     private static final  String INSERT_COMMENT = "insert into comments(post_id, text) values (?, ?)";
+    private static final String UPDATE_COMMENT = """
+                                UPDATE comments
+                                SET 
+                                     post_id = ?
+                                    ,text = ?
+                                WHERE id = ?
+                            """;
 
     private static final String DELETE_COMMENT = "delete from comments where id = ?";
 
@@ -45,7 +52,11 @@ public class JdbcNativeCommentRepository implements CommentRepository {
     }
 
     @Override
-    public Long getTotalCount() {
-        return null;
+    public void update(CommentModel comment) {
+        jdbcTemplate.update(UPDATE_COMMENT,
+            comment.getPostId(),
+            comment.getText(),
+            comment.getId()
+        );
     }
 }

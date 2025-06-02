@@ -136,4 +136,17 @@ public class PostsController {
 
         return REDIRECT_POSTS + "/" + postId;
     }
+
+    @PostMapping("/posts/{id}/comments/{commentId}")
+    public String handlEditComment(
+        @PathVariable("id") Long postId,
+        @PathVariable("commentId") Long commentId,
+        @RequestParam("text") String text) {
+
+        CommentModel comment = new CommentModel(commentId, postId, text);
+
+        commentsService.editComment(comment);
+
+        return REDIRECT_POSTS + "/" + postId;
+    }
 }
