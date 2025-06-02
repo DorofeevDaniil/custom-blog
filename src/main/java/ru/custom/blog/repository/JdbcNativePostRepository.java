@@ -10,12 +10,12 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public class JdbcNativePostRepository implements PostRepository{
 
     private final JdbcTemplate jdbcTemplate;
+
     private static final String SELECT_ALL = """
                                             select id, title, text, image_path, likes_count, tags
                                             from posts
@@ -27,12 +27,14 @@ public class JdbcNativePostRepository implements PostRepository{
                                             from posts
                                             where id = ?
                                         """;
-    public static final String SELECT_IMAGE = "select image_path from posts where id = ?";
-    public static final String INSERT_ROW = """
+    private static final String SELECT_IMAGE = "select image_path from posts where id = ?";
+    private static final String INSERT_ROW = """
                                         insert into posts(title, text, image_path, likes_count, tags) 
                                         values (?, ?, ?, ?, ?)
                                     """;
-    public static final String SELECT_COUNT = "select count(*) as cnt from posts";
+    private static final String UPDATE_LIKES = "update posts set likes_count = likes_count";
+
+    private static final String SELECT_COUNT = "select count(*) as cnt from posts";
 
     public JdbcNativePostRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -89,6 +91,18 @@ public class JdbcNativePostRepository implements PostRepository{
                 rs.getInt("likes_count"),
                 Arrays.stream(rs.getString("tags").split(" ")).toList()
             ), id);
+    }
+
+    @Override
+    public void incrementLikesCount(Long id) {
+        String query = UPDATE_LIKES + " + 1 " + "where id = ?";
+        jdbcTemplate.update(query, id);
+    }
+
+    @Override
+    public void decrementLikesCount(Long id) {
+        String query = UPDATE_LIKES + " - 1 " + "where id = ?";
+        jdbcTemplate.update(query, id);
     }
 
     @Override

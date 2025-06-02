@@ -50,6 +50,16 @@ public class PostService {
         return getPostComments(post);
     }
 
+    public void updateLikesCount(Long id, boolean like) {
+        if (like) {
+            logger.info("LIKE TRUE");
+            postRepository.incrementLikesCount(id);
+        } else {
+            logger.info("LIKE FALSE");
+            postRepository.decrementLikesCount(id);
+        }
+    }
+
     private String saveFile(MultipartFile imageFile, String basePath) {
         String uploadDir = basePath + "images";
 

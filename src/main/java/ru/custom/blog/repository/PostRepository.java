@@ -11,4 +11,6 @@ public interface PostRepository {
     void deleteById(Long id);
     Long getTotalCount();
     String findImageById(Long l);
+    void incrementLikesCount(Long id);
+    void decrementLikesCount(Long id);
 }

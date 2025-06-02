@@ -104,6 +104,11 @@ public class PostModel {
         this.text = text;
     }
 
+    // изменить на построчное чтение
+    public List<String> getTextParts() {
+        return List.of(this.text);
+    }
+
     @Override
     public String toString() {
         return "Post{" + "id='" + this.id + "', title=" + this.title
