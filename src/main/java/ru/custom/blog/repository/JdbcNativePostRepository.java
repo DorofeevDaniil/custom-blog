@@ -1,5 +1,7 @@
 package ru.custom.blog.repository;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -14,6 +16,7 @@ import java.util.List;
 
 @Repository
 public class JdbcNativePostRepository implements PostRepository{
+    private static final Logger logger = LoggerFactory.getLogger(JdbcNativePostRepository.class);
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -75,13 +78,7 @@ public class JdbcNativePostRepository implements PostRepository{
         String selectQuery = SELECT_ALL + String.format(" limit %d offset %d", limit, offset);
 
         return jdbcTemplate.query(selectQuery,
-            (rs, rowNum) -> {
-                try {
-                    return populatePost(rs);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+            (rs, rowNum) -> populatePost(rs));
     }
 
     @Override
@@ -96,13 +93,7 @@ public class JdbcNativePostRepository implements PostRepository{
                 statement.setString(3, tag);
                 statement.setString(4, tag);
             },
-            (rs, rowNum) -> {
-                try {
-                    return populatePost(rs);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+            (rs, rowNum) -> populatePost(rs));
     }
 
     @Override
@@ -146,13 +137,7 @@ public class JdbcNativePostRepository implements PostRepository{
     @Override
     public PostModel findPostById(Long id) {
         return jdbcTemplate.queryForObject(SELECT_POST,
-            (rs, rowNum) -> {
-                try {
-                    return populatePost(rs);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }, id);
+            (rs, rowNum) -> populatePost(rs), id);
     }
 
     @Override
@@ -180,7 +165,7 @@ public class JdbcNativePostRepository implements PostRepository{
         ).get(0);
     }
 
-    private PostModel populatePost(ResultSet resultSet) throws SQLException, IOException {
+    private PostModel populatePost(ResultSet resultSet) throws SQLException {
         return new PostModel(
             resultSet.getLong(ID_FIELD),
             resultSet.getString(TITLE_FIELD),
@@ -191,16 +176,18 @@ public class JdbcNativePostRepository implements PostRepository{
         );
     }
 
-    private String transformBlob(Blob blob) throws SQLException, IOException {
+    private String transformBlob(Blob blob) throws SQLException {
         StringBuilder builder = new StringBuilder();
 
-        BufferedReader br = new BufferedReader(
+        try (BufferedReader br = new BufferedReader(
             new InputStreamReader(blob.getBinaryStream(), StandardCharsets.UTF_8))) {
 
             String line;
             while ((line = br.readLine()) != null) {
                 builder.append(line).append(System.lineSeparator());
             }
+        } catch (IOException e) {
+            logger.info(String.format("Failed to read blob. Got error: %s", e.getMessage()));
         }
 
         return builder.toString();

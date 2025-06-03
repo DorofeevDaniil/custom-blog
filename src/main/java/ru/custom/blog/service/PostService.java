@@ -88,7 +88,7 @@ public class PostService {
         try {
             imageFile.transferTo(destinationFile);
         } catch (IOException e) {
-            logger.error("Файл не записан");
+            logger.error(String.format("Can't write file %s. Got error: %s", filePath, e.getMessage()));
         }
 
         return filePath;
@@ -98,7 +98,7 @@ public class PostService {
         try {
             Files.delete(Path.of(imagePath));
         } catch(IOException e) {
-            logger.error("Файл не может быть удален");
+            logger.error(String.format("Can't remove file %s. Got error: %s", imagePath, e.getMessage()));
         }
     }
 
