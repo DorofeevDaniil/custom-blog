@@ -7,6 +7,8 @@ import org.springframework.stereotype.Repository;
 import ru.custom.blog.model.PostModel;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
@@ -19,6 +21,17 @@ public class JdbcNativePostRepository implements PostRepository{
     private static final String SELECT_ALL = """
                                             select id, title, text, image_path, likes_count, tags
                                             from posts
+                                            order by id desc
+                                        """;
+    private static final String SELECT_ALL_TAG = """
+                                            select id, title, text, image_path, likes_count, tags
+                                            from posts
+                                            where 
+                                                tags like concat('% ', ?, ' %')
+                                            or
+                                                tags like concat(?, ' %')
+                                            or
+                                                tags like concat('% ', ?)
                                             order by id desc
                                         """;
 
@@ -46,6 +59,12 @@ public class JdbcNativePostRepository implements PostRepository{
                             """;
     private static final String DELETE_POST = "delete from posts where id = ?";
 
+    private static final String TITLE_FIELD = "title";
+    private static final String IMAGE_PATH_FIELD = "image_path";
+    private static final String LIKES_COUNT_FIELD = "likes_count";
+    private static final String ID_FIELD = "id";
+    private static final String TEXT_FIELD = "text";
+
     public JdbcNativePostRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -55,14 +74,21 @@ public class JdbcNativePostRepository implements PostRepository{
         String selectQuery = SELECT_ALL + String.format(" limit %d offset %d", limit, offset);
 
         return jdbcTemplate.query(selectQuery,
-            (rs, rowNum) -> new PostModel(
-                rs.getLong("id"),
-                rs.getString("title"),
-                rs.getString("text"),
-                rs.getString("image_path"),
-                rs.getInt("likes_count"),
-                Arrays.stream(rs.getString("tags").split(" ")).toList()
-            ));
+            (rs, rowNum) -> populatePost(rs));
+    }
+
+    @Override
+    public List<PostModel> findPageByTag(String tag, Integer limit, Integer offset) {
+        String selectQuery = SELECT_ALL_TAG + String.format(" limit %d offset %d", limit, offset);
+
+        return jdbcTemplate.query(
+            selectQuery,
+            (PreparedStatement statement) -> {
+                statement.setString(1, tag);
+                statement.setString(2, tag);
+                statement.setString(3, tag);
+            },
+            (rs, rowNum) -> populatePost(rs));
     }
 
     @Override
@@ -96,21 +122,17 @@ public class JdbcNativePostRepository implements PostRepository{
 
     @Override
     public String findImageById(Long id) {
-        return jdbcTemplate.queryForObject(
-            SELECT_IMAGE, new Object[]{id}, String.class);
+        return jdbcTemplate.query(
+            SELECT_IMAGE,
+            (PreparedStatement ps) -> ps.setLong(1, id),
+            (rs, rowNum) -> rs.getString(IMAGE_PATH_FIELD)
+        ).get(0);
     }
 
     @Override
     public PostModel findPostById(Long id) {
         return jdbcTemplate.queryForObject(SELECT_POST,
-            (rs, rowNum) -> new PostModel(
-                rs.getLong("id"),
-                rs.getString("title"),
-                rs.getString("text"),
-                rs.getString("image_path"),
-                rs.getInt("likes_count"),
-                Arrays.stream(rs.getString("tags").split(" ")).toList()
-            ), id);
+            (rs, rowNum) -> populatePost(rs), id);
     }
 
     @Override
@@ -132,6 +154,20 @@ public class JdbcNativePostRepository implements PostRepository{
 
     @Override
     public Long getTotalCount() {
-        return jdbcTemplate.query(SELECT_COUNT, (rs, rowNum) -> rs.getLong("cnt")).get(0);
+        return jdbcTemplate.query(
+            SELECT_COUNT,
+            (rs, rowNum) -> rs.getLong("cnt")
+        ).get(0);
+    }
+
+    private PostModel populatePost(ResultSet resultSet) throws SQLException {
+        return new PostModel(
+            resultSet.getLong(ID_FIELD),
+            resultSet.getString(TITLE_FIELD),
+            resultSet.getString(TEXT_FIELD),
+            resultSet.getString(IMAGE_PATH_FIELD),
+            resultSet.getInt(LIKES_COUNT_FIELD),
+            Arrays.stream(resultSet.getString("tags").split(" ")).toList()
+        );
     }
 }

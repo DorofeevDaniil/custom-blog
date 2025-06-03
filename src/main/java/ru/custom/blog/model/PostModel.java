@@ -80,7 +80,7 @@ public class PostModel {
     public String getTextPreview() {
         if (this.text == null) return "";
 
-        return this.text.length() > 200 ? this.text.substring(0, 200) + "..." : this.text;
+        return this.text.length() > 350 ? this.text.substring(0, 350) + "..." : this.text;
     }
 
     public String getText() {

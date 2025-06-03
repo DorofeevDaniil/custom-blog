@@ -17,6 +17,13 @@ public class Paging {
         this.totalElements = totalElements;
     }
 
+    public Paging(List<PostModel> content, int pageSize, long totalElements) {
+        this.content = content;
+        this.pageNumber = 1;
+        this.pageSize = pageSize;
+        this.totalElements = totalElements;
+    }
+
     public List<PostModel> getContent() {
         return content;
     }

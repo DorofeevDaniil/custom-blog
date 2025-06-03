@@ -39,17 +39,28 @@ public class PostsController {
 
     @GetMapping("/posts")
     public String showPosts(
-                        @RequestParam(name = "pageNumber", defaultValue = "1") int page,
-                        @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
-                        Model model) {
+        @RequestParam(name = "pageNumber", defaultValue = "1") int page,
+        @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+        @RequestParam(name = "search", required = false) String tag,
+        Model model) {
+
+        List<PostModel> posts;
+        Paging paging;
 
         long totalElements = postService.getTotalPostsCount();
-        List<PostModel> posts = postService.getPage(page, pageSize);
 
-        model.addAttribute("paging", new Paging(posts, page, pageSize, totalElements));
-        model.addAttribute("currentPage", page);
-        model.addAttribute("pageSize", pageSize);
+        if (tag != null && !tag.isEmpty()) {
+            posts = postService.getPageByTag(tag, pageSize);
+            paging = new Paging(posts, pageSize, totalElements);
+        } else {
+            posts = postService.getPage(page, pageSize);
+            paging = new Paging(posts, page, pageSize, totalElements);
+        }
+
         model.addAttribute("posts", posts);
+        model.addAttribute("paging",paging);
+        model.addAttribute("pageSize", pageSize);
+        model.addAttribute("currentPage", page);
 
         return "posts";
     }

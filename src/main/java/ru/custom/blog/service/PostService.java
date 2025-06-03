@@ -56,6 +56,10 @@ public class PostService {
         return posts.stream().map(this::getPostComments).toList();
     }
 
+    public List<PostModel> getPageByTag(String tagName, Integer pageSize) {
+        return postRepository.findPageByTag(tagName, pageSize, 0);
+    }
+
     public PostModel getPost(Long id) {
         PostModel post = postRepository.findPostById(id);
         return getPostComments(post);

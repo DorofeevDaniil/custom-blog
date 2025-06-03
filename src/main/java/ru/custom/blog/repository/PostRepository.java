@@ -6,6 +6,7 @@ import java.util.List;
 
 public interface PostRepository {
     List<PostModel> findPage(Integer limit, Integer offset);
+    List<PostModel> findPageByTag(String tag, Integer limit, Integer offset);
     PostModel findPostById(Long id);
     Long save(PostModel post);
     void update(PostModel post);
@@ -14,5 +15,4 @@ public interface PostRepository {
     String findImageById(Long l);
     void incrementLikesCount(Long id);
     void decrementLikesCount(Long id);
-
 }
