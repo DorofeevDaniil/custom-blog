@@ -1,10 +1,10 @@
 package ru.custom.blog.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class PostModel {
-    //id, title, text, imagePath, likesCount, comments
     private Long id;
     private String title;
     private String imagePath;
@@ -87,6 +87,10 @@ public class PostModel {
         return this.text;
     }
 
+    public List<String> getTextParts() {
+        return Arrays.asList(this.text.split("\\R", -1));
+    }
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -113,11 +117,6 @@ public class PostModel {
 
     public void setText(String text) {
         this.text = text;
-    }
-
-    // изменить на построчное чтение
-    public List<String> getTextParts() {
-        return List.of(this.text);
     }
 
     @Override

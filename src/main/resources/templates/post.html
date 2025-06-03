@@ -79,7 +79,7 @@
             </td>
         </tr>
         <tr th:each="textPart : ${post.getTextParts()}">
-            <td th:text="${textPart}"></td>
+            <td th:utext="${#strings.isEmpty(textPart) ? '&nbsp;' : textPart}"></td>
         </tr>
         <tr>
             <td>

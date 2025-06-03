@@ -6,10 +6,9 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.custom.blog.model.PostModel;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.sql.*;
 import java.util.Arrays;
 import java.util.List;
 
@@ -76,7 +75,13 @@ public class JdbcNativePostRepository implements PostRepository{
         String selectQuery = SELECT_ALL + String.format(" limit %d offset %d", limit, offset);
 
         return jdbcTemplate.query(selectQuery,
-            (rs, rowNum) -> populatePost(rs));
+            (rs, rowNum) -> {
+                try {
+                    return populatePost(rs);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
     }
 
     @Override
@@ -91,7 +96,13 @@ public class JdbcNativePostRepository implements PostRepository{
                 statement.setString(3, tag);
                 statement.setString(4, tag);
             },
-            (rs, rowNum) -> populatePost(rs));
+            (rs, rowNum) -> {
+                try {
+                    return populatePost(rs);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
     }
 
     @Override
@@ -102,7 +113,7 @@ public class JdbcNativePostRepository implements PostRepository{
             PreparedStatement statement = connection.prepareStatement(INSERT_ROW, Statement.RETURN_GENERATED_KEYS);
 
             statement.setString(1, post.getTitle());
-            statement.setString(2, post.getText());
+            statement.setBlob(2, new ByteArrayInputStream(post.getText().getBytes(StandardCharsets.UTF_8)));
             statement.setString(3, post.getImagePath());
             statement.setInt(4, post.getLikesCount());
             statement.setString(5, post.getTagsAsText());
@@ -117,7 +128,7 @@ public class JdbcNativePostRepository implements PostRepository{
     public void update(PostModel post) {
         jdbcTemplate.update(UPDATE_POST,
             post.getTitle(),
-            post.getText(),
+            new ByteArrayInputStream(post.getText().getBytes(StandardCharsets.UTF_8)),
             post.getImagePath(),
             post.getTagsAsText(),
             post.getId());
@@ -135,7 +146,13 @@ public class JdbcNativePostRepository implements PostRepository{
     @Override
     public PostModel findPostById(Long id) {
         return jdbcTemplate.queryForObject(SELECT_POST,
-            (rs, rowNum) -> populatePost(rs), id);
+            (rs, rowNum) -> {
+                try {
+                    return populatePost(rs);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }, id);
     }
 
     @Override
@@ -163,14 +180,29 @@ public class JdbcNativePostRepository implements PostRepository{
         ).get(0);
     }
 
-    private PostModel populatePost(ResultSet resultSet) throws SQLException {
+    private PostModel populatePost(ResultSet resultSet) throws SQLException, IOException {
         return new PostModel(
             resultSet.getLong(ID_FIELD),
             resultSet.getString(TITLE_FIELD),
-            resultSet.getString(TEXT_FIELD),
+            transformBlob(resultSet.getBlob(TEXT_FIELD)),
             resultSet.getString(IMAGE_PATH_FIELD),
             resultSet.getInt(LIKES_COUNT_FIELD),
             Arrays.stream(resultSet.getString("tags").split(" ")).toList()
         );
+    }
+
+    private String transformBlob(Blob blob) throws SQLException, IOException {
+        StringBuilder builder = new StringBuilder();
+
+        BufferedReader br = new BufferedReader(
+            new InputStreamReader(blob.getBinaryStream(), StandardCharsets.UTF_8))) {
+
+            String line;
+            while ((line = br.readLine()) != null) {
+                builder.append(line).append(System.lineSeparator());
+            }
+        }
+
+        return builder.toString();
     }
 }
