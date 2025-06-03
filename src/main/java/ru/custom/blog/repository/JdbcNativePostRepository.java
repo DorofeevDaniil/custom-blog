@@ -32,6 +32,8 @@ public class JdbcNativePostRepository implements PostRepository{
                                                 tags like concat(?, ' %')
                                             or
                                                 tags like concat('% ', ?)
+                                            or
+                                                tags like ?
                                             order by id desc
                                         """;
 
@@ -87,6 +89,7 @@ public class JdbcNativePostRepository implements PostRepository{
                 statement.setString(1, tag);
                 statement.setString(2, tag);
                 statement.setString(3, tag);
+                statement.setString(4, tag);
             },
             (rs, rowNum) -> populatePost(rs));
     }

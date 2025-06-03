@@ -20,7 +20,6 @@ import java.util.List;
 
 @Controller
 public class PostsController {
-
     private final PostService postService;
     private final CommentsService commentsService;
 
@@ -45,20 +44,17 @@ public class PostsController {
         Model model) {
 
         List<PostModel> posts;
-        Paging paging;
 
         long totalElements = postService.getTotalPostsCount();
 
         if (tag != null && !tag.isEmpty()) {
             posts = postService.getPageByTag(tag, pageSize);
-            paging = new Paging(posts, pageSize, totalElements);
         } else {
             posts = postService.getPage(page, pageSize);
-            paging = new Paging(posts, page, pageSize, totalElements);
         }
 
         model.addAttribute("posts", posts);
-        model.addAttribute("paging",paging);
+        model.addAttribute("paging", new Paging(posts, page, pageSize, totalElements));
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("currentPage", page);
 
