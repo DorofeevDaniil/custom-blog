@@ -18,11 +18,11 @@ import java.util.List;
 public class PostService {
     private static final Logger logger = LoggerFactory.getLogger(PostService.class);
     private final PostRepository postRepository;
-    private final CommentsService commentsService;
+    private final CommentService commentService;
 
-    public PostService(PostRepository postRepository, CommentsService commentsService) {
+    public PostService(PostRepository postRepository, CommentService commentService) {
         this.postRepository = postRepository;
-        this.commentsService = commentsService;
+        this.commentService = commentService;
     }
 
     public long getTotalPostsCount() {
@@ -102,12 +102,12 @@ public class PostService {
     }
 
     public void deletePost(Long id) {
-        commentsService.deleteAllPostComments(id);
+        commentService.deleteAllPostComments(id);
         postRepository.deleteById(id);
     }
 
     private PostModel getPostComments(PostModel post) {
-        List<CommentModel> comments = commentsService.getByPostId(post.getId());
+        List<CommentModel> comments = commentService.getByPostId(post.getId());
         post.setComments(comments);
         return post;
     }

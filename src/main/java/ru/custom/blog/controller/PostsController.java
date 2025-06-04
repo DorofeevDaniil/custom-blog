@@ -9,10 +9,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
-import ru.custom.blog.model.CommentModel;
 import ru.custom.blog.model.PostModel;
 import ru.custom.blog.pagination.Paging;
-import ru.custom.blog.service.CommentsService;
 import ru.custom.blog.service.PostService;
 
 import java.util.Arrays;
@@ -21,14 +19,12 @@ import java.util.List;
 @Controller
 public class PostsController {
     private final PostService postService;
-    private final CommentsService commentsService;
 
     private static final String REDIRECT_POSTS = "redirect:/posts";
 
     @Autowired
-    public PostsController(PostService postService, CommentsService commentsService) {
+    public PostsController(PostService postService) {
         this.postService = postService;
-        this.commentsService = commentsService;
     }
 
     @GetMapping("/")
@@ -69,7 +65,13 @@ public class PostsController {
         @RequestParam("image") MultipartFile image,
         HttpServletRequest request) {
 
-        PostModel post = new PostModel(title, 0, Arrays.stream(tags.split(" ")).toList(), text);
+        PostModel post = new PostModel();
+
+        post.setTitle(title);
+        post.setLikesCount(0);
+        post.setTags(Arrays.stream(tags.split(" ")).toList());
+        post.setText(text);
+
         Long postId = postService.savePost(post, image, request.getServletContext().getRealPath(""));
 
         return REDIRECT_POSTS + "/" + postId;
@@ -84,7 +86,13 @@ public class PostsController {
         @RequestParam("image") MultipartFile image,
         HttpServletRequest request) {
 
-        PostModel post = new PostModel(id, title, Arrays.stream(tags.split(" ")).toList(), text);
+        PostModel post = new PostModel();
+
+        post.setId(id);
+        post.setTitle(title);
+        post.setTags(Arrays.stream(tags.split(" ")).toList());
+        post.setText(text);
+
         postService.editPost(post, image, request.getServletContext().getRealPath(""));
 
         return REDIRECT_POSTS + "/" + id;
@@ -117,42 +125,5 @@ public class PostsController {
         postService.deletePost(id);
 
         return REDIRECT_POSTS;
-    }
-
-    @PostMapping("/posts/{id}/comments")
-    public String handleAddComment(
-        @PathVariable("id") Long postId,
-        @RequestParam("text") String text) {
-
-        CommentModel comment = new CommentModel();
-        comment.setPostId(postId);
-        comment.setText(text);
-
-        commentsService.saveComment(comment);
-
-        return REDIRECT_POSTS + "/" + postId;
-    }
-
-    @PostMapping("/posts/{id}/comments/{commentId}/delete")
-    public String handleDeleteComment(
-        @PathVariable("id") Long postId,
-        @PathVariable("commentId") Long commentId) {
-
-        commentsService.removeComment(commentId);
-
-        return REDIRECT_POSTS + "/" + postId;
-    }
-
-    @PostMapping("/posts/{id}/comments/{commentId}")
-    public String handleEditComment(
-        @PathVariable("id") Long postId,
-        @PathVariable("commentId") Long commentId,
-        @RequestParam("text") String text) {
-
-        CommentModel comment = new CommentModel(commentId, postId, text);
-
-        commentsService.editComment(comment);
-
-        return REDIRECT_POSTS + "/" + postId;
     }
 }

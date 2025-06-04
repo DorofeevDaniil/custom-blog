@@ -13,32 +13,6 @@ public class PostModel {
     private List<String> tags;
     private String text;
 
-    public PostModel(Long id, String title, String text, String imagePath, Integer likesCount, List<String> tags) {
-        this.id = id;
-        this.title = title;
-        this.text = text;
-        this.imagePath = imagePath;
-        this.likesCount = likesCount;
-        this.tags = tags;
-    }
-
-    public PostModel(String title, Integer likesCount, List<String> tags, String text) {
-        this.title = title;
-        this.likesCount = likesCount;
-        this.tags = tags;
-        this.text = text;
-    }
-
-    public PostModel(Long id, String title, List<String> tags, String text) {
-        this.id = id;
-        this.title = title;
-        this.tags = tags;
-        this.text = text;
-    }
-
-    public PostModel() {
-    }
-
     public Long getId() {
         return this.id;
     }

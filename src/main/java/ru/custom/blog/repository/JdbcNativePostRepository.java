@@ -166,14 +166,16 @@ public class JdbcNativePostRepository implements PostRepository{
     }
 
     private PostModel populatePost(ResultSet resultSet) throws SQLException {
-        return new PostModel(
-            resultSet.getLong(ID_FIELD),
-            resultSet.getString(TITLE_FIELD),
-            transformBlob(resultSet.getBlob(TEXT_FIELD)),
-            resultSet.getString(IMAGE_PATH_FIELD),
-            resultSet.getInt(LIKES_COUNT_FIELD),
-            Arrays.stream(resultSet.getString("tags").split(" ")).toList()
-        );
+        PostModel post = new PostModel();
+
+        post.setId(resultSet.getLong(ID_FIELD));
+        post.setTitle(resultSet.getString(TITLE_FIELD));
+        post.setText(transformBlob(resultSet.getBlob(TEXT_FIELD)));
+        post.setImagePath(resultSet.getString(IMAGE_PATH_FIELD));
+        post.setLikesCount(resultSet.getInt(LIKES_COUNT_FIELD));
+        post.setTags(Arrays.stream(resultSet.getString("tags").split(" ")).toList());
+
+        return post;
     }
 
     private String transformBlob(Blob blob) throws SQLException {

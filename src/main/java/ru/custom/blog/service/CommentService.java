@@ -7,11 +7,11 @@ import ru.custom.blog.repository.CommentRepository;
 import java.util.List;
 
 @Service
-public class CommentsService {
+public class CommentService {
 
     private final CommentRepository commentRepository;
 
-    public CommentsService(CommentRepository commentRepository) {
+    public CommentService(CommentRepository commentRepository) {
         this.commentRepository = commentRepository;
     }
 
