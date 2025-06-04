@@ -29,10 +29,6 @@ public class PostService {
         return postRepository.getTotalCount();
     }
 
-    //addComment
-
-    //addTags
-
     public Long savePost(PostModel post, MultipartFile imageFile, String basePath) {
         String filePath = saveImage(imageFile, basePath);
         post.setImagePath(filePath);
@@ -42,12 +38,15 @@ public class PostService {
 
     public void editPost(PostModel post, MultipartFile imageFile, String basePath) {
         String previousImagePath = postRepository.findImageById(post.getId());
+        String filePath = previousImagePath;
 
-        String filePath = saveImage(imageFile, basePath);
+        if (!imageFile.getOriginalFilename().isEmpty()) {
+            removeImage(previousImagePath);
+            filePath = saveImage(imageFile, basePath);
+        }
+
         post.setImagePath(filePath);
         postRepository.update(post);
-
-        removeImage(previousImagePath);
     }
 
     public List<PostModel> getPage(Integer pageNumber, Integer pageSize) {

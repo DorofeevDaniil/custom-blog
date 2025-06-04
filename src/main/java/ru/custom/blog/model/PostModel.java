@@ -13,16 +13,6 @@ public class PostModel {
     private List<String> tags;
     private String text;
 
-    public PostModel(Long id, String title, String imagePath, Integer likesCount, List<CommentModel> comments, List<String> tags, String text) {
-        this.id = id;
-        this.title = title;
-        this.imagePath = imagePath;
-        this.likesCount = likesCount;
-        this.comments = comments;
-        this.tags = tags;
-        this.text = text;
-    }
-
     public PostModel(Long id, String title, String text, String imagePath, Integer likesCount, List<String> tags) {
         this.id = id;
         this.title = title;
@@ -80,7 +70,7 @@ public class PostModel {
     public String getTextPreview() {
         if (this.text == null) return "";
 
-        return this.text.length() > 350 ? this.text.substring(0, 350) + "..." : this.text;
+        return this.text.length() > 350 ? convertUrlsToLinks(this.text).substring(0, 350) + "..." : convertUrlsToLinks(this.text);
     }
 
     public String getText() {
@@ -88,7 +78,7 @@ public class PostModel {
     }
 
     public List<String> getTextParts() {
-        return Arrays.asList(this.text.split("\\R", -1));
+        return Arrays.asList(convertUrlsToLinks(this.text).split("\\R", -1));
     }
 
     public void setId(Long id) {
@@ -119,11 +109,10 @@ public class PostModel {
         this.text = text;
     }
 
-    @Override
-    public String toString() {
-        return "Post{" + "id='" + this.id + "', title=" + this.title
-            + "', imagePath=" + this.imagePath + "', likesCount=" + this.likesCount
-            + "', comments=" + this.comments + "', tags=" + this.tags
-            + "', text=" + this.text + "}";
+    private String convertUrlsToLinks(String text) {
+        return text.replaceAll(
+            "(https?://[^\\s\"']+)",
+            "<a href=\"$1\" target=\"_blank\">$1</a>"
+        );
     }
 }

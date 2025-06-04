@@ -101,7 +101,7 @@ public class PostsController {
     }
 
     @PostMapping("/posts/{id}/like")
-    public String handleUpdatePost(
+    public String handleLikePost(
         @PathVariable("id") Long id,
         @RequestParam("like") boolean like) {
 
@@ -120,10 +120,9 @@ public class PostsController {
     }
 
     @PostMapping("/posts/{id}/comments")
-    public String handlAddComment(
+    public String handleAddComment(
         @PathVariable("id") Long postId,
         @RequestParam("text") String text) {
-
 
         CommentModel comment = new CommentModel();
         comment.setPostId(postId);
@@ -135,7 +134,7 @@ public class PostsController {
     }
 
     @PostMapping("/posts/{id}/comments/{commentId}/delete")
-    public String handlAddComment(
+    public String handleDeleteComment(
         @PathVariable("id") Long postId,
         @PathVariable("commentId") Long commentId) {
 
@@ -145,7 +144,7 @@ public class PostsController {
     }
 
     @PostMapping("/posts/{id}/comments/{commentId}")
-    public String handlEditComment(
+    public String handleEditComment(
         @PathVariable("id") Long postId,
         @PathVariable("commentId") Long commentId,
         @RequestParam("text") String text) {

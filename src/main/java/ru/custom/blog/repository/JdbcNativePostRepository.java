@@ -187,7 +187,7 @@ public class JdbcNativePostRepository implements PostRepository{
                 builder.append(line).append(System.lineSeparator());
             }
         } catch (IOException e) {
-            logger.info(String.format("Failed to read blob. Got error: %s", e.getMessage()));
+            logger.error(String.format("Failed to read blob. Got error: %s", e.getMessage()));
         }
 
         return builder.toString();

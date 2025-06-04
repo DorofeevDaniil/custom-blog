@@ -26,7 +26,7 @@ public class CommentModel {
         return this.postId;
     }
 
-    public void settId(Long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
