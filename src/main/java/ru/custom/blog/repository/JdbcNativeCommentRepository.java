@@ -1,20 +1,23 @@
 package ru.custom.blog.repository;
 
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.custom.blog.model.CommentModel;
 
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.List;
 
 @Repository
 public class JdbcNativeCommentRepository implements CommentRepository {
-    private static final String SELECT_ALL = "select id, post_id, text from comments where post_id = ?";
+    private static final String SELECT_ALL = "select id, post_id, text from comments where post_id = ? order by id asc";
     private static final  String INSERT_COMMENT = "insert into comments(post_id, text) values (?, ?)";
     private static final String UPDATE_COMMENT = """
                                 UPDATE comments
                                 SET 
-                                     post_id = ?
-                                    ,text = ?
+                                    text = ?
                                 WHERE id = ?
                             """;
 
@@ -39,18 +42,25 @@ public class JdbcNativeCommentRepository implements CommentRepository {
     }
 
     @Override
-    public void save(CommentModel comment) {
+    public Long save(CommentModel comment) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
         jdbcTemplate.update(
-            INSERT_COMMENT,
-            comment.getPostId(),
-            comment.getText()
-        );
+            connection -> {
+                PreparedStatement statement = connection.prepareStatement(INSERT_COMMENT, Statement.RETURN_GENERATED_KEYS);
+
+                statement.setLong(1, comment.getPostId());
+                statement.setString(2, comment.getText());
+
+                return statement;
+            }, keyHolder);
+
+        return keyHolder.getKey().longValue();
     }
 
     @Override
     public void update(CommentModel comment) {
         jdbcTemplate.update(UPDATE_COMMENT,
-            comment.getPostId(),
             comment.getText(),
             comment.getId()
         );

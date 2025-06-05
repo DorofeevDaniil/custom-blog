@@ -44,7 +44,7 @@
                         <img height="300" th:src="@{/images/{id}(id=${post.getId()})}">
                     </a>
                 </p>
-                <pre th:text="${post.getTextPreview()}"></pre>
+                <pre th:text="${post.getTextPreview()}" style="white-space: pre-wrap;"></pre>
                 <p>
                     <span th:text="${'&#x1F44D; '+post.getLikesCount()}"></span>
                     <span th:text="${'&#x2709; '+post.getComments().size()}"></span>

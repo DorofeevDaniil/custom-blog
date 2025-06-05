@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class JdbcNativePostRepository implements PostRepository{
@@ -126,18 +127,22 @@ public class JdbcNativePostRepository implements PostRepository{
     }
 
     @Override
-    public String findImageById(Long id) {
-        return jdbcTemplate.query(
+    public Optional<String> findImageById(Long id) {
+        List<String> images =  jdbcTemplate.query(
             SELECT_IMAGE,
             (PreparedStatement ps) -> ps.setLong(1, id),
             (rs, rowNum) -> rs.getString(IMAGE_PATH_FIELD)
-        ).get(0);
+        );
+
+        return images.stream().findFirst();
     }
 
     @Override
-    public PostModel findPostById(Long id) {
-        return jdbcTemplate.queryForObject(SELECT_POST,
+    public Optional<PostModel> findPostById(Long id) {
+        List<PostModel> posts = jdbcTemplate.query(SELECT_POST,
             (rs, rowNum) -> populatePost(rs), id);
+
+        return posts.stream().findFirst();
     }
 
     @Override
@@ -184,10 +189,11 @@ public class JdbcNativePostRepository implements PostRepository{
         try (BufferedReader br = new BufferedReader(
             new InputStreamReader(blob.getBinaryStream(), StandardCharsets.UTF_8))) {
 
-            String line;
-            while ((line = br.readLine()) != null) {
-                builder.append(line).append(System.lineSeparator());
+            int c;
+            while ((c = br.read()) != -1) {
+                builder.append((char) c);
             }
+
         } catch (IOException e) {
             logger.error(String.format("Failed to read blob. Got error: %s", e.getMessage()));
         }

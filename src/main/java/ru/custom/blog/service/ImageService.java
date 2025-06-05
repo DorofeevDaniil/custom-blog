@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 @Service
 public class ImageService {
@@ -22,13 +23,13 @@ public class ImageService {
     }
 
     public ResponseEntity<Resource> getImage(Long id) {
-        String imagePath = postRepository.findImageById(id);
+        Optional<String> imagePath = postRepository.findImageById(id);
 
-        if (imagePath == null) {
+        if (imagePath.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
-        Path filePath = Paths.get(imagePath);
+        Path filePath = Paths.get(imagePath.get());
         if (!Files.exists(filePath)) {
             return ResponseEntity.notFound().build();
         }

@@ -1,5 +1,7 @@
 package ru.custom.blog.model;
 
+import java.util.Objects;
+
 public class CommentModel {
     private Long id;
     private Long postId;
@@ -36,5 +38,22 @@ public class CommentModel {
 
     public void setPostId(Long postId) {
         this.postId = postId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof CommentModel)) return false;
+
+        CommentModel pm = (CommentModel) o;
+
+        return Objects.equals(id, pm.id)
+            && Objects.equals(postId, pm.postId)
+            && Objects.equals(text, pm.text);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, postId, text);
     }
 }

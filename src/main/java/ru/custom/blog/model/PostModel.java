@@ -1,8 +1,6 @@
 package ru.custom.blog.model;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class PostModel {
     private Long id;
@@ -88,5 +86,28 @@ public class PostModel {
             "(https?://[^\\s\"']+)",
             "<a href=\"$1\" target=\"_blank\">$1</a>"
         );
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof PostModel)) return false;
+
+        PostModel pm = (PostModel) o;
+
+        return Objects.equals(id, pm.id)
+            && Objects.equals(title, pm.title)
+            && Objects.equals(imagePath, pm.imagePath)
+            && Objects.equals(likesCount, pm.likesCount)
+            && new HashSet<>(Optional.ofNullable(comments).orElse(Collections.emptyList()))
+                .equals(new HashSet<>(Optional.ofNullable(pm.comments).orElse(Collections.emptyList())))
+            && new HashSet<>(Optional.ofNullable(tags).orElse(Collections.emptyList()))
+                .equals(new HashSet<>(Optional.ofNullable(pm.tags).orElse(Collections.emptyList())))
+            && Objects.equals(text, pm.text);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, title, imagePath, likesCount, comments, tags, text);
     }
 }

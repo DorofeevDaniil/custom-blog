@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PostService {
@@ -37,15 +38,15 @@ public class PostService {
     }
 
     public void editPost(PostModel post, MultipartFile imageFile, String basePath) {
-        String previousImagePath = postRepository.findImageById(post.getId());
-        String filePath = previousImagePath;
+        Optional<String> previousImagePath = postRepository.findImageById(post.getId());
 
         if (!imageFile.getOriginalFilename().isEmpty()) {
-            removeImage(previousImagePath);
-            filePath = saveImage(imageFile, basePath);
+            previousImagePath.ifPresent(this::removeImage);
+            post.setImagePath(saveImage(imageFile, basePath));
+        } else {
+            previousImagePath.ifPresent(post::setImagePath);
         }
 
-        post.setImagePath(filePath);
         postRepository.update(post);
     }
 
@@ -60,7 +61,7 @@ public class PostService {
     }
 
     public PostModel getPost(Long id) {
-        PostModel post = postRepository.findPostById(id);
+        PostModel post = postRepository.findPostById(id).orElseGet(PostModel::new);
         return getPostComments(post);
     }
 
