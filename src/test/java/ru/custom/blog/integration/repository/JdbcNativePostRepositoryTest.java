@@ -2,6 +2,7 @@ package ru.custom.blog.integration.repository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -25,6 +26,7 @@ import java.util.*;
 @SpringJUnitConfig(classes = {DataSourceConfiguration.class, JdbcNativePostRepository.class})
 @TestPropertySource(locations = "classpath:test-application.properties")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class JdbcNativePostRepositoryTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -36,41 +38,19 @@ public class JdbcNativePostRepositoryTest {
     public static final ArrayList<String> IDLE_TEXT = new ArrayList<>(Arrays.asList("example string 1", "example string 2", "example string 3"));
     public static final ArrayList<String> IDLE_IMAGE_PATH = new ArrayList<>(Arrays.asList("path1", "path2", "path3"));
     public static final ArrayList<String> IDLE_TTAGS = new ArrayList<>(Arrays.asList("simple1 tag1", "simple2 tag2", "simple3 tag3"));
-    public static final ArrayList<PostModel> IDLE_POSTS = new ArrayList<>();
+    private static final ArrayList<PostModel> IDLE_POSTS = new ArrayList<>();
 
     @BeforeEach
     void setUp() {
         // Очистка базы данных
         jdbcTemplate.execute("DELETE FROM posts");
+
+        jdbcTemplate.execute("ALTER TABLE posts ALTER COLUMN id RESTART WITH 1");
+        jdbcTemplate.execute("ALTER TABLE comments ALTER COLUMN id RESTART WITH 1");
+
         IDLE_POSTS.clear();
 
-        for(int i = 0; i < IDLE_TITLES.size(); i++) {
-            KeyHolder keyHolder = new GeneratedKeyHolder();
-
-            PostModel post = new PostModel();
-            post.setTitle(IDLE_TITLES.get(i));
-            post.setText(IDLE_TEXT.get(i));
-            post.setImagePath(IDLE_IMAGE_PATH.get(i));
-            post.setLikesCount(1);
-            post.setTags(Arrays.stream(IDLE_TTAGS.get(i).split(" ")).toList());
-
-            jdbcTemplate.update(connection -> {
-                PreparedStatement statement = connection.prepareStatement(
-                    "insert into posts(title, text, image_path, likes_count, tags) values (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-
-                statement.setString(1, post.getTitle());
-                statement.setBlob(2, new ByteArrayInputStream(post.getText().getBytes(StandardCharsets.UTF_8)));
-                statement.setString(3, post.getImagePath());
-                statement.setInt(4, post.getLikesCount());
-                statement.setString(5, post.getTagsAsText());
-
-
-                return statement;
-            }, keyHolder);
-
-            post.setId(keyHolder.getKey().longValue());
-            IDLE_POSTS.add(post);
-        }
+        populatePosts();
     }
 
     @Test
@@ -203,5 +183,35 @@ public class JdbcNativePostRepositoryTest {
         model.setTags(List.of("some4","tag4"));
 
         return model;
+    }
+
+    private void populatePosts() {
+        for(int i = 0; i < IDLE_TITLES.size(); i++) {
+            KeyHolder keyHolder = new GeneratedKeyHolder();
+
+            PostModel post = new PostModel();
+            post.setTitle(IDLE_TITLES.get(i));
+            post.setText(IDLE_TEXT.get(i));
+            post.setImagePath(IDLE_IMAGE_PATH.get(i));
+            post.setLikesCount(1);
+            post.setTags(Arrays.stream(IDLE_TTAGS.get(i).split(" ")).toList());
+
+            jdbcTemplate.update(connection -> {
+                PreparedStatement statement = connection.prepareStatement(
+                    "insert into posts(title, text, image_path, likes_count, tags) values (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+
+                statement.setString(1, post.getTitle());
+                statement.setBlob(2, new ByteArrayInputStream(post.getText().getBytes(StandardCharsets.UTF_8)));
+                statement.setString(3, post.getImagePath());
+                statement.setInt(4, post.getLikesCount());
+                statement.setString(5, post.getTagsAsText());
+
+
+                return statement;
+            }, keyHolder);
+
+            post.setId(keyHolder.getKey().longValue());
+            IDLE_POSTS.add(post);
+        }
     }
 }
