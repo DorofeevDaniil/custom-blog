@@ -26,6 +26,7 @@ import ru.custom.blog.model.CommentModel;
 import ru.custom.blog.model.PostModel;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.ArrayList;
@@ -53,6 +54,7 @@ class PostsControllerIntegrationTest {
 
     private static final ArrayList<CommentModel> IDLE_COMMENTS = new ArrayList<>();
     private static final ArrayList<PostModel> IDLE_POSTS = new ArrayList<>();
+    private static final String IMAGE_NAME = "/images/test-image.jpg";
 
     @BeforeEach
     void setUp() {
@@ -153,12 +155,7 @@ class PostsControllerIntegrationTest {
 
     @Test
     void handleCreatePost_shouldAddPost() throws Exception {
-        MockMultipartFile imageFile = new MockMultipartFile(
-            "image",
-            "test-image.png",
-            "image/png",
-            new ClassPathResource("images/test-image.jpg").getInputStream()
-        );
+        MockMultipartFile imageFile = createMultipart();
 
         mockMvc.perform(multipart("/posts")
                 .file(imageFile)
@@ -171,12 +168,7 @@ class PostsControllerIntegrationTest {
 
     @Test
     void handleUpdatePost_shouldUpdatePost() throws Exception {
-        MockMultipartFile imageFile = new MockMultipartFile(
-            "image",
-            "test-image.png",
-            "image/png",
-            new ClassPathResource("images/test-image.jpg").getInputStream()
-        );
+        MockMultipartFile imageFile = createMultipart();
 
         mockMvc.perform(multipart("/posts/1")
                 .file(imageFile)
@@ -234,6 +226,15 @@ class PostsControllerIntegrationTest {
         mockMvc.perform(post("/posts/1/delete"))
             .andExpect(status().is3xxRedirection())
             .andExpect(redirectedUrl("/posts"));
+    }
+
+    private MockMultipartFile createMultipart() throws IOException {
+        return new MockMultipartFile(
+            "image",
+            "test-image.png",
+            "image/png",
+            new ClassPathResource(IMAGE_NAME).getInputStream()
+        );
     }
 
     private void populatePosts() {
