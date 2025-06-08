@@ -1,5 +1,6 @@
 package ru.custom.blog.integration.controller;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -17,6 +19,8 @@ import ru.custom.blog.integration.configuration.DataSourceConfiguration;
 import ru.custom.blog.integration.configuration.WebConfiguration;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -26,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringJUnitConfig(classes = {DataSourceConfiguration.class, WebConfiguration.class})
 @WebAppConfiguration
+@ActiveProfiles("integration")
 @TestPropertySource(locations = "classpath:test-application.properties")
 class ImageControllerIntegrationTest {
 
@@ -48,6 +53,17 @@ class ImageControllerIntegrationTest {
 
         jdbcTemplate.execute("ALTER TABLE posts ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.execute("ALTER TABLE comments ALTER COLUMN id RESTART WITH 1");
+    }
+
+    @AfterEach
+    void tearDown() throws IOException {
+        File imageDir = new File(webApplicationContext.getServletContext().getRealPath("/images"));
+        if (imageDir.exists()) {
+            Files.walk(imageDir.toPath())
+                .map(Path::toFile)
+                .sorted((a, b) -> -a.compareTo(b))
+                .forEach(File::delete);
+        }
     }
 
     @Test

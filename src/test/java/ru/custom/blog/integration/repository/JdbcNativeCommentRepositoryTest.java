@@ -2,12 +2,11 @@ package ru.custom.blog.integration.repository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import ru.custom.blog.integration.configuration.DataSourceConfiguration;
@@ -27,9 +26,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.*;
 
 @SpringJUnitConfig(classes = {DataSourceConfiguration.class, JdbcNativeCommentRepository.class})
+@ActiveProfiles("integration")
 @TestPropertySource(locations = "classpath:test-application.properties")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class JdbcNativeCommentRepositoryTest {
 
     @Autowired

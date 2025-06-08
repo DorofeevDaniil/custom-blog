@@ -32,6 +32,10 @@
     </multipart-config>
   </servlet>
 
+  <listener>
+    <listener-class>ru.custom.blog.initializer.LogbackInitializer</listener-class>
+  </listener>
+
   <!-- DispatcherServlet обрабатывает все запросы -->
   <servlet-mapping>
     <servlet-name>dispatcher</servlet-name>

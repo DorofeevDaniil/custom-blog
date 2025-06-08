@@ -1,9 +1,11 @@
 package ru.custom.blog.integration.controller;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -18,7 +20,11 @@ import ru.custom.blog.model.CommentModel;
 import ru.custom.blog.model.PostModel;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.Arrays;
@@ -30,6 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringJUnitConfig(classes = {DataSourceConfiguration.class, WebConfiguration.class})
 @WebAppConfiguration
+@ActiveProfiles("integration")
 @TestPropertySource(locations = "classpath:test-application.properties")
 class CommentControllerIntegrationTest {
 
@@ -53,6 +60,17 @@ class CommentControllerIntegrationTest {
 
         populatePosts();
         populateComments();
+    }
+
+    @AfterEach
+    void tearDown() throws IOException {
+        File imageDir = new File(webApplicationContext.getServletContext().getRealPath("/images"));
+        if (imageDir.exists()) {
+            Files.walk(imageDir.toPath())
+                .map(Path::toFile)
+                .sorted((a, b) -> -a.compareTo(b))
+                .forEach(File::delete);
+        }
     }
 
     @Test

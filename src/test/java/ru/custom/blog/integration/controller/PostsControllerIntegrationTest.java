@@ -3,6 +3,7 @@ package ru.custom.blog.integration.controller;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -26,8 +28,11 @@ import ru.custom.blog.model.CommentModel;
 import ru.custom.blog.model.PostModel;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +46,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringJUnitConfig(classes = {DataSourceConfiguration.class, WebConfiguration.class})
 @WebAppConfiguration
+@ActiveProfiles("integration")
 @TestPropertySource(locations = "classpath:test-application.properties")
 class PostsControllerIntegrationTest {
 
@@ -73,6 +79,18 @@ class PostsControllerIntegrationTest {
         populatePosts();
         populateComments();
     }
+
+    @AfterEach
+    void tearDown() throws IOException {
+        File imageDir = new File(webApplicationContext.getServletContext().getRealPath("/images"));
+        if (imageDir.exists()) {
+            Files.walk(imageDir.toPath())
+                .map(Path::toFile)
+                .sorted((a, b) -> -a.compareTo(b))
+                .forEach(File::delete);
+        }
+    }
+
 
     @Test
     void showPosts_shouldReturnHtmlWithPosts() throws Exception {
@@ -250,7 +268,7 @@ class PostsControllerIntegrationTest {
 
             jdbcTemplate.update(connection -> {
                 PreparedStatement statement = connection.prepareStatement(
-                    "insert into posts(title, text, image_path, likes_count, tags) values (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                    "insert into posts(title, text, image_path, likes_count, tags) values (?, ?, ?, ?, ?)", new String[] {"id"});
 
                 statement.setString(1, post.getTitle());
                 statement.setBlob(2, new ByteArrayInputStream(post.getText().getBytes(StandardCharsets.UTF_8)));
@@ -277,7 +295,7 @@ class PostsControllerIntegrationTest {
 
             jdbcTemplate.update(connection -> {
                 PreparedStatement statement = connection.prepareStatement(
-                    "insert into comments(post_id, text) values (?, ?)", Statement.RETURN_GENERATED_KEYS);
+                    "insert into comments(post_id, text) values (?, ?)", new String[] {"id"});
 
                 statement.setLong(1, comment.getPostId());
                 statement.setString(2, comment.getText());
