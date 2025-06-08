@@ -93,13 +93,16 @@ class PostServiceTest {
         String basePath = "/tmp";
         String expectedPath = IMAGE_NAME;
 
+        // Проверка вызова метода
         doNothing().when(mockPostRepository).update(any(PostModel.class));
         when(mockPostRepository.findImageById(mockPostModel.getId())).thenReturn(Optional.of(expectedPath));
         when(mockImageService.saveImage(mockFile, basePath)).thenReturn(expectedPath);
         doNothing().when(mockImageService).removeImage(expectedPath);
 
+        // Выполнение метода
         postService.editPost(mockPostModel, mockFile, basePath);
 
+        // Проверка вызовов
         verify(mockPostRepository, times(1)).findImageById(anyLong());
         verify(mockPostRepository, times(1)).update(any(PostModel.class));
         verify(mockImageService, times(1)).removeImage(expectedPath);
@@ -123,14 +126,17 @@ class PostServiceTest {
         mockResponseComment.setPostId(secondMockPost.getId());
         mockResponseComment.setText(mockText);
 
+        // Проверка вызова метода
         when(mockPostRepository.findPage(10, 0)).thenReturn(List.of(firstMockPost, secondMockPost));
         when(mockCommentService.getByPostId(firstMockPost.getId())).thenReturn(new ArrayList<>());
         when(mockCommentService.getByPostId(secondMockPost.getId())).thenReturn(List.of(mockResponseComment));
 
+        // Выполнение метода
         List<PostModel> posts = postService.getPage(1, 10);
 
         secondMockPost.setComments(List.of(mockResponseComment));
 
+        // Проверка вызовов
         verify(mockPostRepository, times(1)).findPage(10, 0);
         verify(mockCommentService, times(2)).getByPostId(anyLong());
 
@@ -156,14 +162,17 @@ class PostServiceTest {
         mockResponseComment.setPostId(secondMockPost.getId());
         mockResponseComment.setText(mockText);
 
+        // Проверка вызова метода
         when(mockPostRepository.findPageByTag("tag", 10, 0)).thenReturn(List.of(firstMockPost, secondMockPost));
         when(mockCommentService.getByPostId(firstMockPost.getId())).thenReturn(new ArrayList<>());
         when(mockCommentService.getByPostId(secondMockPost.getId())).thenReturn(List.of(mockResponseComment));
 
+        // Выполнение метода
         List<PostModel> posts = postService.getPageByTag("tag", 10);
 
         secondMockPost.setComments(List.of(mockResponseComment));
 
+        // Проверка вызовов
         verify(mockPostRepository, times(1)).findPageByTag(anyString(), anyInt(), anyInt());
         verify(mockCommentService, times(2)).getByPostId(anyLong());
 
@@ -177,11 +186,14 @@ class PostServiceTest {
         PostModel mockPost = new PostModel();
         mockPost.setId(FIRST_ID);
 
+        // Проверка вызова метода
         when(mockPostRepository.findPostById(mockPost.getId())).thenReturn(Optional.of(mockPost));
         when(mockCommentService.getByPostId(mockPost.getId())).thenReturn(new ArrayList<>());
 
+        // Выполнение метода
         PostModel post = postService.getPost(mockPost.getId());
 
+        // Проверка вызовов
         verify(mockPostRepository, times(1)).findPostById(anyLong());
         verify(mockCommentService, times(1)).getByPostId(anyLong());
         assertEquals(mockPost, post);
@@ -191,11 +203,14 @@ class PostServiceTest {
     void getPost_emptyWhenPostDoesNotExists() {
         PostModel mockPost = new PostModel();
 
+        // Проверка вызова метода
         when(mockPostRepository.findPostById(FIRST_ID)).thenReturn(Optional.empty());
         when(mockCommentService.getByPostId(mockPost.getId())).thenReturn(new ArrayList<>());
 
+        // Выполнение метода
         PostModel post = postService.getPost(FIRST_ID);
 
+        // Проверка вызовов
         verify(mockPostRepository, times(1)).findPostById(anyLong());
         verify(mockCommentService, times(1)).getByPostId(null);
         assertEquals(mockPost, post);
@@ -203,19 +218,25 @@ class PostServiceTest {
 
     @Test
     void updateLikesCount_increment() {
+        // Проверка вызова метода
         doNothing().when(mockPostRepository).incrementLikesCount(FIRST_ID);
 
+        // Выполнение метода
         postService.updateLikesCount(FIRST_ID, true);
 
+        // Проверка вызовов
         verify(mockPostRepository, times(1)).incrementLikesCount(anyLong());
     }
 
     @Test
     void updateLikesCount_decrement() {
+        // Проверка вызова метода
         doNothing().when(mockPostRepository).decrementLikesCount(FIRST_ID);
 
+        // Выполнение метода
         postService.updateLikesCount(FIRST_ID, false);
 
+        // Проверка вызовов
         verify(mockPostRepository, times(1)).decrementLikesCount(anyLong());
     }
 

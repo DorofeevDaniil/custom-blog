@@ -5,9 +5,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.custom.blog.repository.PostRepository;
 import ru.custom.blog.service.ImageService;
@@ -18,9 +20,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.Optional;
 
 import static org.mockito.Mockito.reset;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("unit")
@@ -31,6 +35,8 @@ class ImageServiceTest {
 
     @Autowired
     private ImageService mockImageService;
+
+    private static final Long FIRST_ID = 1L;
 
     private Path tempFile;
     private Path tempDir;
@@ -53,6 +59,39 @@ class ImageServiceTest {
                 .map(Path::toFile)
                 .forEach(File::delete);
         }
+    }
+
+    @Test
+    void getImage_imageNotFoundInDatabase() {
+        when(mockPostRepository.findImageById(FIRST_ID)).thenReturn(Optional.empty());
+
+        ResponseEntity<Resource> response = mockImageService.getImage(FIRST_ID);
+
+        assertEquals(404, response.getStatusCodeValue());
+    }
+
+    @Test
+    void getImage_imageFileDoesNotExist() {
+        when(mockPostRepository.findImageById(FIRST_ID)).thenReturn(Optional.of("/non/existing/path/image.jpg"));
+
+        ResponseEntity<Resource> response = mockImageService.getImage(FIRST_ID);
+
+        assertEquals(404, response.getStatusCodeValue());
+    }
+
+    @Test
+    void getImage_imageIsReturnedSuccessfully() throws IOException {
+        Path imageFile = tempDir.resolve("test.jpg");
+        Files.write(imageFile, "test content".getBytes());
+
+        when(mockPostRepository.findImageById(FIRST_ID)).thenReturn(Optional.of(imageFile.toString()));
+
+        ResponseEntity<Resource> response = mockImageService.getImage(FIRST_ID);
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertNotNull(response.getBody());
+        assertEquals("inline; filename=\"test.jpg\"", response.getHeaders().getFirst("Content-Disposition"));
+        assertEquals("image/jpeg", response.getHeaders().getContentType().toString());
     }
 
     @Test
