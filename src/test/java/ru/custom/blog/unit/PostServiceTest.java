@@ -58,11 +58,10 @@ class PostServiceTest {
         PostModel mockPostModel = new PostModel();
         MultipartFile mockFile = createMultipart();
         String basePath = "/tmp";
-        String expectedPath = IMAGE_NAME;
 
         // Проверка вызова метода
         when(postRepository.save(any(PostModel.class))).thenReturn(FIRST_ID);
-        when(imageService.saveImage(mockFile, basePath)).thenReturn(expectedPath);
+        when(imageService.saveImage(mockFile, basePath)).thenReturn(IMAGE_NAME);
 
         // Выполнение метода
         Long result = postService.savePost(mockPostModel, mockFile, basePath);
