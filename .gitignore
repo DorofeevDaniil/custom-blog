@@ -37,4 +37,4 @@ out/
 .vscode/
 
 /logs
-/src/main/webapp
+/src/main/webapp/
