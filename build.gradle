@@ -30,3 +30,66 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+bootJar.finalizedBy('generateBatScripts')
+
+tasks.register('generateBatScripts') {
+	dependsOn bootJar
+	doLast {
+		def outputDir = "${buildDir}/libs"
+		def jarName = "custom-blog-0.0.1-SNAPSHOT.jar"
+
+		// Стартовый скрипт
+		def startFile = new File(outputDir, "start.bat")
+		startFile.text = """@echo off
+setlocal
+set JAR_NAME=${jarName}
+
+echo Starting %JAR_NAME%...
+
+start "custom-blog" java -jar %~dp0%JAR_NAME%
+timeout /t 5 > nul
+
+for /f "tokens=1,*" %%a in ('jps -lv ^| findstr /i "%JAR_NAME%"') do (
+    echo %%a > "%~dp0app.pid"
+    echo Application started with PID %%a
+    goto end
+)
+
+echo Failed to find running application matching %JAR_NAME%
+
+:end
+endlocal
+"""
+
+		// Скрипт остановки
+		def stopFile = new File(outputDir, "stop.bat")
+		stopFile.text = """@echo off
+setlocal
+
+set "PID_FILE=%~dp0app.pid"
+
+if exist "%PID_FILE%" (
+    for /f "usebackq delims=" %%p in ("%PID_FILE%") do (
+        set "PID=%%p"
+        goto readDone
+    )
+    echo Could not read PID from file.
+    goto end
+) else (
+    echo No PID file found. Is the application running?
+    goto end
+)
+
+:readDone
+echo Stopping application with PID [%PID%]...
+taskkill /PID %PID% /F
+del "%PID_FILE%"
+echo Application stopped.
+
+:end
+endlocal
+"""
+		println "Bat-scripts created: start.bat and stop.bat in ${outputDir}"
+	}
+}
