@@ -12,17 +12,12 @@ import java.util.List;
 
 @Repository
 public class JdbcNativeCommentRepository implements CommentRepository {
-    private static final String SELECT_ALL = "select id, post_id, text from comments where post_id = ? order by id asc";
-    private static final  String INSERT_COMMENT = "insert into comments(post_id, text) values (?, ?)";
-    private static final String UPDATE_COMMENT = """
-                                UPDATE comments
-                                SET 
-                                    text = ?
-                                WHERE id = ?
-                            """;
+    private static final String SELECT_ALL = "SELECT id, post_id, text FROM comments WHERE post_id = ? ORDER BY id ASC";
+    private static final  String INSERT_COMMENT = "INSERT INTO comments(post_id, text) VALUES (?, ?)";
+    private static final String UPDATE_COMMENT = "UPDATE comments SET text = ? WHERE id = ?";
 
-    private static final String DELETE_COMMENT = "delete from comments where id = ?";
-    private static final String DELETE_POST_COMMENTS = "delete from comments where post_id = ?";
+    private static final String DELETE_COMMENT = "DELETE FROM comments WHERE id = ?";
+    private static final String DELETE_POST_COMMENTS = "DELETE FROM comments WHERE post_id = ?";
 
     private final JdbcTemplate jdbcTemplate;
 

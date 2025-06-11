@@ -1,15 +1,15 @@
-create table if not exists posts(
-    id bigserial primary key,
-    title varchar(256) not null,
-    text blob not null,
-    image_path varchar(256) not null,
-    likes_count integer not null,
-    tags varchar(500) not null
+CREATE TABLE IF NOT EXISTS posts(
+    id BIGSERIAL PRIMARY KEY,
+    title VARCHAR(256) NOT NULL,
+    text BLOB NOT NULL,
+    image_path VARCHAR(256) NOT NULL,
+    likes_count INTEGER NOT NULL,
+    tags VARCHAR(500) NOT NULL
 );
 
-create table if not exists comments(
-    id bigserial primary key,
-    post_id bigint not null,
-    text varchar(1000000000) not null,
-    foreign key (post_id) references posts(id)
+CREATE TABLE IF NOT EXISTS comments(
+    id BIGSERIAL PRIMARY KEY,
+    post_id BIGINT NOT NULL,
+    text VARCHAR(1000000000) NOT NULL,
+    FOREIGN KEY (post_id) REFERENCES posts(id)
 );

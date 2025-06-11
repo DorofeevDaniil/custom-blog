@@ -246,7 +246,8 @@ class PostsControllerIntegrationTest extends BaseControllerTest {
 
             jdbcTemplate.update(connection -> {
                 PreparedStatement statement = connection.prepareStatement(
-                    "insert into posts(title, text, image_path, likes_count, tags) values (?, ?, ?, ?, ?)", new String[] {"id"});
+                    "INSERT INTO posts(title, text, image_path, likes_count, tags) VALUES (?, ?, ?, ?, ?)",
+                    new String[] {"id"});
 
                 statement.setString(1, post.getTitle());
                 statement.setBlob(2, new ByteArrayInputStream(post.getText().getBytes(StandardCharsets.UTF_8)));
@@ -273,7 +274,7 @@ class PostsControllerIntegrationTest extends BaseControllerTest {
 
             jdbcTemplate.update(connection -> {
                 PreparedStatement statement = connection.prepareStatement(
-                    "insert into comments(post_id, text) values (?, ?)", new String[] {"id"});
+                    "INSERT INTO comments(post_id, text) VALUES (?, ?)", new String[] {"id"});
 
                 statement.setLong(1, comment.getPostId());
                 statement.setString(2, comment.getText());

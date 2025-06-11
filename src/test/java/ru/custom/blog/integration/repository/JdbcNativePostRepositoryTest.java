@@ -180,7 +180,8 @@ public class JdbcNativePostRepositoryTest extends BaseRepositoryTest {
 
             jdbcTemplate.update(connection -> {
                 PreparedStatement statement = connection.prepareStatement(
-                    "insert into posts(title, text, image_path, likes_count, tags) values (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                    "INSERT INTO posts(title, text, image_path, likes_count, tags) VALUES (?, ?, ?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS);
 
                 statement.setString(1, post.getTitle());
                 statement.setBlob(2, new ByteArrayInputStream(post.getText().getBytes(StandardCharsets.UTF_8)));

@@ -22,47 +22,57 @@ public class JdbcNativePostRepository implements PostRepository{
     private final JdbcTemplate jdbcTemplate;
 
     private static final String SELECT_ALL = """
-                                            select id, title, text, image_path, likes_count, tags
-                                            from posts
-                                            order by id desc
+                                            SELECT 
+                                                id, title, text, image_path, likes_count, tags
+                                            FROM 
+                                                posts
+                                            ORDER BY id DESC
+                                            LIMIT ? OFFSET ?
                                         """;
     private static final String SELECT_ALL_TAG = """
-                                            select id, title, text, image_path, likes_count, tags
-                                            from posts
-                                            where 
-                                                tags like concat('% ', ?, ' %')
-                                            or
-                                                tags like concat(?, ' %')
-                                            or
-                                                tags like concat('% ', ?)
-                                            or
-                                                tags like ?
-                                            order by id desc
+                                            SELECT 
+                                                id, title, text, image_path, likes_count, tags
+                                            FROM 
+                                                posts
+                                            WHERE 
+                                                tags LIKE CONCAT('% ', ?, ' %')
+                                            OR
+                                                tags LIKE CONCAT(?, ' %')
+                                            OR
+                                                tags LIKE CONCAT('% ', ?)
+                                            OR
+                                                tags LIKE ?
+                                            ORDER BY id DESC
+                                            LIMIT ? OFFSET ?
                                         """;
 
     private static final String SELECT_POST = """
-                                            select id, title, text, image_path, likes_count, tags
-                                            from posts
-                                            where id = ?
+                                            SELECT 
+                                                id, title, text, image_path, likes_count, tags
+                                            FROM 
+                                                posts
+                                            WHERE 
+                                                id = ?
                                         """;
-    private static final String SELECT_IMAGE = "select image_path from posts where id = ?";
+    private static final String SELECT_IMAGE = "SELECT image_path FROM posts WHERE id = ?";
     private static final String INSERT_ROW = """
-                                        insert into posts(title, text, image_path, likes_count, tags) 
-                                        values (?, ?, ?, ?, ?)
+                                        INSERT INTO 
+                                            posts(title, text, image_path, likes_count, tags) 
+                                        VALUES 
+                                            (?, ?, ?, ?, ?)
                                     """;
-    private static final String UPDATE_LIKES = "update posts set likes_count = likes_count";
+    private static final String UPDATE_LIKES = "UPDATE posts SET likes_count = likes_count";
 
-    private static final String SELECT_COUNT = "select count(*) as cnt from posts";
+    private static final String SELECT_COUNT = "SELECT COUNT(*) AS cnt FROM posts";
     private static final String UPDATE_POST = """
-                                UPDATE posts
+                                UPDATE 
+                                    posts
                                 SET 
-                                     title = ?
-                                    ,text = ?
-                                    ,image_path = ?
-                                    ,tags = ?
-                                WHERE id = ?
+                                     title = ?, text = ?, image_path = ?, tags = ?
+                                WHERE 
+                                    id = ?
                             """;
-    private static final String DELETE_POST = "delete from posts where id = ?";
+    private static final String DELETE_POST = "DELETE FROM posts WHERE id = ?";
 
     private static final String TITLE_FIELD = "title";
     private static final String IMAGE_PATH_FIELD = "image_path";
@@ -76,23 +86,25 @@ public class JdbcNativePostRepository implements PostRepository{
 
     @Override
     public List<PostModel> findPage(Integer limit, Integer offset) {
-        String selectQuery = SELECT_ALL + String.format(" limit %d offset %d", limit, offset);
-
-        return jdbcTemplate.query(selectQuery,
+        return jdbcTemplate.query(SELECT_ALL,
+            (PreparedStatement statement) -> {
+                statement.setInt(1, limit);
+                statement.setInt(2, offset);
+            },
             (rs, rowNum) -> populatePost(rs));
     }
 
     @Override
     public List<PostModel> findPageByTag(String tag, Integer limit, Integer offset) {
-        String selectQuery = SELECT_ALL_TAG + String.format(" limit %d offset %d", limit, offset);
-
         return jdbcTemplate.query(
-            selectQuery,
+            SELECT_ALL_TAG,
             (PreparedStatement statement) -> {
                 statement.setString(1, tag);
                 statement.setString(2, tag);
                 statement.setString(3, tag);
                 statement.setString(4, tag);
+                statement.setInt(5, limit);
+                statement.setInt(6, offset);
             },
             (rs, rowNum) -> populatePost(rs));
     }
@@ -147,13 +159,13 @@ public class JdbcNativePostRepository implements PostRepository{
 
     @Override
     public void incrementLikesCount(Long id) {
-        String query = UPDATE_LIKES + " + 1 " + "where id = ?";
+        String query = UPDATE_LIKES + " + 1 " + "WHERE id = ?";
         jdbcTemplate.update(query, id);
     }
 
     @Override
     public void decrementLikesCount(Long id) {
-        String query = UPDATE_LIKES + " - 1 " + "where id = ?";
+        String query = UPDATE_LIKES + " - 1 " + "WHERE id = ?";
         jdbcTemplate.update(query, id);
     }
 

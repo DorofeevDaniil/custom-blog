@@ -122,7 +122,7 @@ public class JdbcNativeCommentRepositoryTest extends BaseRepositoryTest {
 
             jdbcTemplate.update(connection -> {
                 PreparedStatement statement = connection.prepareStatement(
-                    "insert into comments(post_id, text) values (?, ?)", Statement.RETURN_GENERATED_KEYS);
+                    "INSERT INTO comments(post_id, text) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
 
                 statement.setLong(1, comment.getPostId());
                 statement.setString(2, comment.getText());
@@ -147,7 +147,8 @@ public class JdbcNativeCommentRepositoryTest extends BaseRepositoryTest {
 
             jdbcTemplate.update(connection -> {
                 PreparedStatement statement = connection.prepareStatement(
-                    "insert into posts(title, text, image_path, likes_count, tags) values (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                    "INSERT INTO posts(title, text, image_path, likes_count, tags) VALUES (?, ?, ?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS);
 
                 statement.setString(1, post.getTitle());
                 statement.setBlob(2, new ByteArrayInputStream(post.getText().getBytes(StandardCharsets.UTF_8)));
