@@ -37,7 +37,7 @@ tasks.register('generateBatScripts') {
 	dependsOn bootJar
 	doLast {
 		def outputDir = "${buildDir}/libs"
-		def jarName = "custom-blog-0.0.1-SNAPSHOT.jar"
+		def jarName = "${rootProject.name}-${version}.jar"
 
 		// Стартовый скрипт
 		def startFile = new File(outputDir, "start.bat")
@@ -77,12 +77,12 @@ if exist "%PID_FILE%" (
     echo Could not read PID from file.
     goto end
 ) else (
-    echo No PID file found. Is the application running?
+    echo No PID file found. Is the application ${jarName} running?
     goto end
 )
 
 :readDone
-echo Stopping application with PID [%PID%]...
+echo Stopping application ${jarName} with PID [%PID%]
 taskkill /PID %PID% /F
 del "%PID_FILE%"
 echo Application stopped.
