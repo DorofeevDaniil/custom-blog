@@ -93,3 +93,55 @@ endlocal
 		println "Bat-scripts created: start.bat and stop.bat in ${outputDir}"
 	}
 }
+
+tasks.register('generateReadme') {
+	def versionName = project.version
+	def appName = project.name
+	def jarName = "${rootProject.name}-${version}.jar"
+
+	doLast {
+		def readmeContent = """# Приложение ${appName} 
+## Версия: ${versionName}
+Приложение представляет из себя полукастомный полублог, разработанный в рамках проектной рабты.
+Приложение предоставляет возможность просмотра, создания и изменения постов, оставления комментариев 
+и лайков, а также дизлайков при особо острой необходимости.
+
+
+## Сборка
+Для сбоки необходимо в корне проекта выполнить команду    `./gradlew clean bootJar`
+
+После этого jar-файл будет собран и расположен по пути `./build/libs`  
+
+## Запуск
+### Unix-подобные системы
+#### Запуск
+Выполнить команду `./build/libs/${jarName} start`
+
+После этого приложение будет доступно по адресу http://localhost:8080/
+
+#### Остановка
+Выполнить команду `./build/libs/${jarName} stop`
+
+### Windows
+#### Запуск
+Выполнить команду `./build/libs/start.bat` (либо вручную открыть файл)
+
+После этого приложение будет доступно по адресу http://localhost:8080/
+
+> [!WARNING]
+> Можно также запустить напрямую исполняемый jar-файл командой `./build/libs/${jarName}`, 
+но остановка будет возможна только последовательным выполнением команд 
+> 1. `jps -lv | findstr /i custom-blog` 
+> 2. `taskkill /PID <PID> /f`
+
+#### Остановка
+Выполнить команду `./build/libs/stop.bat` (либо вручную открыть файл)
+
+### Из исходного кода
+Выполнить команду `./gradlew bootRun`
+
+### Тестирование
+Для запуска тестов необходимо выполнить команду `./gradlew test`"""
+		file("README.md").text = readmeContent
+	}
+}
